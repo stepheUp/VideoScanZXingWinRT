@@ -1,0 +1,496 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Nokia.Graphics.Imaging.Managed</name>
+    </assembly>
+    <members>
+        <member name="T:Nokia.Graphics.Imaging.CustomEffectBase">
+            <summary>
+            Base class for custom user-defined effects.
+            </summary>
+            <remarks>
+            To create your own effect, subclass CustomEffectBase and provide your own implementation of OnProcess(Rect rect, Size imageSize, uint[] sourceImagePixels, uint[] targetImagePixels).
+            <para>The only supported color format in this version is ColorFormat.Bgra8888, which means pixels are represented as <see cref="T:System.UInt32"/> values.</para>
+            </remarks>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.#ctor(Nokia.Graphics.Imaging.IImageProvider,System.Boolean)">
+            <summary>
+            EffectBase constructor.
+            </summary>
+            <param name="source"><see cref="T:Nokia.Graphics.Imaging.IImageProvider"/> to use as source.</param>
+            <param name="isInplace">If true, the sourcePixels and targetPixels parameters to OnProcess will refer to the same array. This can be more efficient, but may restrict the effect (writing a pixel means the original source pixel is discarded). If false, different buffers are used. The default value is false.</param>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.Dispose(System.Boolean)">
+            <summary>
+            Dispose the object.
+            </summary>
+            <param name="disposing">True if this is a call to Dispose(), or false if called by the finalizer.</param>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.OnLoadAsync">
+            <summary>
+            Called when the effect should load/prepare for rendering.
+            </summary>
+            <returns>
+            An async action representing the work.
+            </returns>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.OnProcess(Nokia.Graphics.Imaging.PixelRegion,Nokia.Graphics.Imaging.PixelRegion)">
+            <summary>
+            Called when the effect is asked to process a rectangular area of the image.
+            </summary>
+            <param name="sourcePixelRegion">The region of source pixels to read.</param>
+            <param name="targetPixelRegion">The region of target pixels to write.</param>
+            <remarks>
+            If the <see cref="T:Nokia.Graphics.Imaging.CustomEffectBase"/> is created with isInplace set to true, the two pixel regions are the same, and point to the same array data.
+            <para>
+            Also, in this version of the API, the two <see cref="T:Nokia.Graphics.Imaging.PixelRegion"/> objects may be assumed to have the same StartIndex, Pitch and ImageSize.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.ToColor(System.UInt32)">
+            <summary>
+            Return a <see cref="T:Windows.UI.Color"/> from an unsigned integer.
+            </summary>
+            <param name="uintColor">The unsigned integer to convert.</param>
+            <returns>Returns a color instance.</returns>
+            <remarks>
+            If this method is called for every pixel in a buffer, the overhead of the function call becomes quite large.
+            Then it is better to extract the color channel values inline, as in the following sample.
+            <code>
+            var a = (byte)((uintColor &gt;&gt; 24) &amp; 255);
+            var r = (byte)((uintColor &gt;&gt; 16) &amp; 255);
+            var g = (byte)((uintColor &gt;&gt; 8) &amp; 255);
+            var b = (byte)((uintColor) &amp; 255);
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.FromColor(Windows.UI.Color)">
+            <summary>
+            Encode a <see cref="T:Windows.UI.Color"/> into an unsigned integer.
+            </summary>
+            <param name="color">The color to encode.</param>
+            <returns>An unsigned integer representing the color.</returns>
+            <remarks>
+            If this method is called for every pixel in a buffer, the overhead of the function call becomes quite large.
+            Then it is better to combine the color channel values inline, as in the following sample.
+            <code>
+            var color = (uint)(b | (g &lt;&lt; 8) | (r &lt;&lt; 16) | (a &lt;&lt; 24));
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.PreloadAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.GetInfoAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.Lock(Nokia.Graphics.Imaging.RenderRequest)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.GetBitmapAsync(Nokia.Graphics.Imaging.Bitmap,Nokia.Graphics.Imaging.OutputOption)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.Nokia#Graphics#Imaging#ICustomEffect#LoadAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.Nokia#Graphics#Imaging#ICustomEffect#ProvideSourceBuffer(Windows.Foundation.Size)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.Nokia#Graphics#Imaging#ICustomEffect#ProvideTargetBuffer(Windows.Foundation.Size)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomEffectBase.Nokia#Graphics#Imaging#ICustomEffect#Process(Windows.Foundation.Rect)">
+            <inheritdoc/>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.CustomEffectBase.Source">
+            <inheritdoc/>
+        </member>
+        <member name="T:Nokia.Graphics.Imaging.CustomFilterBase">
+            <summary>
+            Base class for user-defined custom filters with support for block based processing.
+            </summary>
+            <remarks>
+            To create your own filter, subclass CustomFilterBase and provide your own implementation of OnProcess.
+            </remarks>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.#ctor(Nokia.Graphics.Imaging.Margins,System.Boolean,System.Collections.Generic.IEnumerable{Nokia.Graphics.Imaging.ColorMode})">
+            <summary>
+            CustomFilterBase constructor.
+            </summary>
+            <param name="blockMargins">
+            Margins that describe how many neighboring source pixels that the filter will need outside the edge of each pixel block. 
+            This is useful when each target pixel should be influenced by more than just the directly corresponding source pixel.
+            Having non-zero <paramref name="blockMargins"/> means that the sourcePixelRegion provided in the call to <see cref="M:Nokia.Graphics.Imaging.CustomFilterBase.OnProcess(Nokia.Graphics.Imaging.PixelRegion,Nokia.Graphics.Imaging.PixelRegion)"/> will 
+            contain more pixels than the targetPixelRegion does. While the size of the two Bounds will be the same, the source pixel region has a non-zero 
+            StartIndex and a Pitch that includes the left and right block margins. This way, the mapping between source and target remains natural, but it 
+            is safe to index source pixels outside the Bounds to the limits set by the <paramref name="blockMargins"/>.
+            </param>
+            <param name="wrapBorders">If set true and <see paramref="blockMargins"/> are non-zero, when processing a block at the edge of an image, the pixel data in the margin will still be taken from inside the image. If false, the pixels in the margin will be transparent black.</param>
+            <param name="supportedColorModes">The color modes that the implementation supports. Valid values are <see cref="F:Nokia.Graphics.Imaging.ColorMode.Bgra8888"/> and <see cref="F:Nokia.Graphics.Imaging.ColorMode.Ayuv4444"/>.</param>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.Dispose(System.Boolean)">
+            <summary>
+            Dispose the object.
+            </summary>
+            <param name="disposing">True if this is a call to Dispose(), or false if called by the finalizer.</param>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.OnPrepareAsync">
+            <summary>
+            Called when the filter should load/prepare for rendering.
+            </summary>
+            <returns>
+            An async action representing the work.
+            </returns>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.OnProcess(Nokia.Graphics.Imaging.PixelRegion,Nokia.Graphics.Imaging.PixelRegion)">
+            <summary>
+            Called when the filter is asked to process a rectangular "block" in the image.
+            </summary>
+            <param name="sourcePixelRegion">The region of source pixels for the current image block, including any block margins. See remarks.</param>
+            <param name="targetPixelRegion">The region of target pixels for the current image block. See remarks.</param>
+            <remarks>
+            <para>
+            The source pixel region is configured as follows:
+            <list type="bullet">
+            <item>
+            <term>StartIndex</term><description>Index of the source pixel that corresponds to the top-left pixel in the target pixel region. When using block margins, this index is non-zero.</description>
+            </item>
+            <item>
+            <term>Bounds</term><description>The rectangle of source pixels that correspond exactly to the target pixel region.</description>
+            </item>
+            <item>
+            <term>Pitch</term><description>The distance in pixels between the start of a row and the start of the next row. When using block margins, this is equal to Bounds.Width + BlockMargins.Left + BlockMargins.Right.</description>
+            </item>
+            <item>
+            <term>ImageSize</term><description>The size of the source pixel region including margins.</description>
+            </item>
+            </list>
+            </para>
+            <para>
+            The target pixel region is configured as follows:
+            <list type="bullet">
+            <item>
+            <term>StartIndex</term><description>Index of the top-left pixel in the target pixel reigon. Always zero.</description>
+            </item>
+            <item>
+            <term>Bounds</term><description>X and Y describe the location and size of the target pixel region within the full image.</description>
+            </item>
+            <item>
+            <term>Pitch</term><description>The width of the target pixel region. This is the same as Bounds.Width.</description>
+            </item>
+            <item>
+            <term>ImageSize</term><description>The size of the target pixel region. The Width and Height are the same as Bounds.Width and Bounds.Height.</description>
+            </item>
+            </list>
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.Nokia#Graphics#Imaging#ICustomFilter#PrepareAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.Nokia#Graphics#Imaging#ICustomFilter#BeginProcessing(Nokia.Graphics.Imaging.ICustomFilterRequest)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.Nokia#Graphics#Imaging#ICustomFilter#ProcessBlock(Nokia.Graphics.Imaging.CustomFilterBlockParameters)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.Nokia#Graphics#Imaging#IFilter#PrepareAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.Nokia#Graphics#Imaging#IFilter#Apply(Nokia.Graphics.Imaging.IFilterEffect)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomFilterBase.Nokia#Graphics#Imaging#IFilter#Lock(Nokia.Graphics.Imaging.RenderRequest)">
+            <inheritdoc/>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.CustomFilterBase.ImageSize">
+            <summary>The size of the whole image.</summary> 
+        </member>
+        <member name="T:Nokia.Graphics.Imaging.ImageProviderExtensions">
+            <summary>
+            Extension methods for IImageProvider.
+            </summary>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.ImageProviderExtensions.Then``1(Nokia.Graphics.Imaging.IImageProvider,``0)">
+            <summary>
+            Enables a fluid way of chaining multiple IImageProviders and IImageConsumers.
+            </summary>
+            <param name="provider">The image provider.</param>
+            <param name="consumer">The image consumer.</param>
+            <typeparam name="TImageConsumer">The extended image consumer.</typeparam>
+            <returns>The consumer that was passed in.</returns>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.ImageProviderExtensions.GetBitmapAsync(Nokia.Graphics.Imaging.IImageProvider,Windows.UI.Xaml.Media.Imaging.WriteableBitmap,Nokia.Graphics.Imaging.OutputOption)">
+            <summary>
+            Create a WriteableBitmap with the contents of the image provider.
+            </summary>
+            <param name="imageProvider">The extended <see cref="T:Nokia.Graphics.Imaging.IImageProvider"/>.</param>
+            <param name="writeableBitmap">An input <see cref="T:Windows.UI.Xaml.Media.Imaging.WriteableBitmap"/> to fill. </param>
+            <param name="outputOption">Specifies how to adjust if the source image has different aspect ratio from the bitmap passed into this method.</param>
+            <returns>
+            An async result with the bitmap.
+            </returns>
+        </member>
+        <member name="T:Nokia.InteropServices.WindowsRuntime.WindowsRuntimeBufferExtensions">
+            <summary>
+            Provides extension methods for operating on Windows Runtime buffers (Windows.Storage.Streams.IBuffer). 
+            </summary>
+        </member>
+        <member name="M:Nokia.InteropServices.WindowsRuntime.WindowsRuntimeBufferExtensions.AsBuffer(System.Int32[])">
+            <summary>
+            Wrap an array of <see cref="T:System.Int32"/> in an <see cref="T:Windows.Storage.Streams.IBuffer"/>.
+            </summary>
+            <remarks>
+            The array data may be pinned (preventing garbage collection) at various times during the lifetime of the returned <see cref="T:Windows.Storage.Streams.IBuffer"/>.
+            When used in the Imaging SDK, care is taken not to leave the data pinned for longer than necessary.
+            </remarks>
+            <param name="data">The array to wrap.</param>
+            <returns>An <see cref="T:Windows.Storage.Streams.IBuffer"/> representing the data.</returns>
+        </member>
+        <member name="M:Nokia.InteropServices.WindowsRuntime.WindowsRuntimeBufferExtensions.AsBuffer(System.UInt32[])">
+            <summary>
+            Wrap an array of <see cref="T:System.UInt32"/> in an <see cref="T:Windows.Storage.Streams.IBuffer"/>.
+            </summary>
+            <remarks>
+            The array data may be pinned (preventing garbage collection) at various times during the lifetime of the returned <see cref="T:Windows.Storage.Streams.IBuffer"/>.
+            When used in the Imaging SDK, care is taken not to leave the data pinned for longer than necessary.
+            </remarks>
+            <param name="data">The array to wrap.</param>
+            <returns>An <see cref="T:Windows.Storage.Streams.IBuffer"/> representing the data.</returns>
+        </member>
+        <member name="T:Nokia.InteropServices.WindowsRuntime.WriteableBitmapExtensions">
+            <summary>
+            Extension methods for <see cref="T:Windows.UI.Xaml.Media.Imaging.WriteableBitmap"/>
+            </summary>
+        </member>
+        <member name="M:Nokia.InteropServices.WindowsRuntime.WriteableBitmapExtensions.AsBitmap(Windows.UI.Xaml.Media.Imaging.WriteableBitmap,Windows.Foundation.Rect)">
+            <summary>
+            Creates an <see cref="T:Nokia.Graphics.Imaging.IReadableBitmap"/> wrapping the pixel data of a <see cref="T:Windows.UI.Xaml.Media.Imaging.WriteableBitmap"/>, without copying it.
+            </summary>
+            <remarks>
+            Using the returned <see cref="T:Nokia.Graphics.Imaging.Bitmap"/> leads to undefined results if the <see cref="T:Windows.UI.Xaml.Media.Imaging.WriteableBitmap"/> contains any transparent pixels (alpha less than 255). This is not supported.
+            <para>The pixel data may be pinned (preventing garbage collection) at various times during the lifetime of the returned <see cref="T:Nokia.Graphics.Imaging.Bitmap"/>.
+            When used in the Imaging SDK, care is taken not to leave the data pinned for longer than necessary.</para>
+            </remarks>
+            <param name="writeableBitmap">The <see cref="T:Windows.UI.Xaml.Media.Imaging.WriteableBitmap"/>.</param>
+            <param name="cropArea">The area of the <see cref="T:Windows.UI.Xaml.Media.Imaging.WriteableBitmap"/> to wrap as a <see cref="T:Nokia.Graphics.Imaging.Bitmap"/>. By default the entire <see cref="T:Windows.UI.Xaml.Media.Imaging.WriteableBitmap"/> is used.</param>
+            <returns>A <see cref="T:Nokia.Graphics.Imaging.Bitmap"/> wrapping the pixel data of <paramref name="writeableBitmap"/>.</returns>
+        </member>
+        <member name="M:Nokia.InteropServices.WindowsRuntime.WriteableBitmapExtensions.AsBitmap(Windows.UI.Xaml.Media.Imaging.WriteableBitmap,Nokia.Graphics.Imaging.ColorMode,Windows.Foundation.Rect)">
+            <summary>
+            INTERNAL: Creates a <see cref="T:Nokia.Graphics.Imaging.Bitmap"/> wrapping the pixel data of a <see cref="T:Windows.UI.Xaml.Media.Imaging.WriteableBitmap"/>, using the specified ColorMode, without copying it.
+            </summary>
+            <remarks>
+            The pixel data may be pinned (preventing garbage collection) at various times during the lifetime of the returned <see cref="T:Nokia.Graphics.Imaging.Bitmap"/>.
+            When used in the Imaging SDK, care is taken not to leave the data pinned for longer than necessary.
+            </remarks>
+            <param name="writeableBitmap">The writeable bitmap to wrap.</param>
+            <param name="colorMode">The ColorMode to mark the bitmap with.</param>
+            <param name="cropArea">The area of the <see cref="T:Windows.UI.Xaml.Media.Imaging.WriteableBitmap"/> to wrap as a <see cref="T:Nokia.Graphics.Imaging.Bitmap"/>. By default the entire <see cref="T:Windows.UI.Xaml.Media.Imaging.WriteableBitmap"/> is used.</param>
+            <returns>A <see cref="T:Nokia.Graphics.Imaging.Bitmap"/> wrapping the pixel data of <paramref name="writeableBitmap"/>.</returns>
+        </member>
+        <member name="T:Nokia.Graphics.Imaging.PixelRegion">
+            <summary>
+            Represents a region of pixels within a pixel array, and contains metrics and helper methods for traversing them.
+            </summary>
+            <example>
+            <code><![CDATA[
+            pixelRegion.ForEachRow((index, width, pos) =>
+            {
+                for (int x = 0; x < width; ++x, ++index)
+                {
+                    targetPixels[index] = sourcePixels[index]; // Do nothing, just pass through the pixel.
+                }
+            });
+            ]]></code>
+            </example>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.PixelRegion.ForEachRow(Nokia.Graphics.Imaging.PixelRegion.ProcessRowAction)">
+            <summary>
+            Run the user-supplied action per row within the <see cref="P:Nokia.Graphics.Imaging.PixelRegion.Bounds"/>.
+            </summary>
+            <param name="rowAction">A user-provided action which when called is expected to process one row of pixels.</param>
+            <remarks>Using this method saves the user of having to think of the <see cref="P:Nokia.Graphics.Imaging.PixelRegion.Pitch"/> to find the index of each row of pixels.</remarks>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.PixelRegion.ForEachRow(Nokia.Graphics.Imaging.PixelRegion,Nokia.Graphics.Imaging.PixelRegion.ProcessRowWithSourceAction)">
+            <summary>
+            Run the user-supplied action per row within the <see cref="P:Nokia.Graphics.Imaging.PixelRegion.Bounds"/>, also tracking a source PixelRegion having margins that will be read from.
+            </summary>
+            <param name="sourcePixelRegion">A source PixelRegion that will be read from. It is assumed to have non-zero margins.</param>
+            <param name="rowAction">A user-provided action which when called is expected to process one row of pixels.</param>
+            <remarks>Using this method saves the user of having to think of the <see cref="P:Nokia.Graphics.Imaging.PixelRegion.Pitch"/> to find the index of each row of pixels.</remarks>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.PixelRegion.Bounds">
+            <summary>
+            The bounds of the region within the image to be processed.
+            </summary>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.PixelRegion.ImagePixels">
+            <summary>
+            The array of image pixels of size Pitch * ImageSize.Height.
+            </summary>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.PixelRegion.ImageSize">
+            <summary>
+            The size of the image in <see cref="P:Nokia.Graphics.Imaging.PixelRegion.ImagePixels"/>.
+            </summary>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.PixelRegion.StartIndex">
+            <summary>
+            The index within <see cref="P:Nokia.Graphics.Imaging.PixelRegion.ImagePixels"/> of the first pixel to process, based on <see cref="P:Nokia.Graphics.Imaging.PixelRegion.Bounds"/>.
+            </summary>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.PixelRegion.Pitch">
+            <summary>
+            The index distance between rows in <see cref="P:Nokia.Graphics.Imaging.PixelRegion.ImagePixels"/>.
+            </summary>
+            <remarks>This may be equal or greater to the Width member of <see cref="P:Nokia.Graphics.Imaging.PixelRegion.ImageSize"/>.</remarks>
+        </member>
+        <member name="T:Nokia.Graphics.Imaging.PixelRegion.ProcessRowAction">
+            <summary>
+            A user-supplied action which can be used with <see cref="M:Nokia.Graphics.Imaging.PixelRegion.ForEachRow(Nokia.Graphics.Imaging.PixelRegion.ProcessRowAction)"/>.
+            </summary>
+            <param name="startIndex">The index within <see cref="P:Nokia.Graphics.Imaging.PixelRegion.ImagePixels"/> of the first pixel to process on this row.</param>
+            <param name="width">The number of pixels to process on this row.</param>
+            <param name="startPosition">For reference, this is the position of the first pixel in this row, within the entire image.</param>
+        </member>
+        <member name="T:Nokia.Graphics.Imaging.PixelRegion.ProcessRowWithSourceAction">
+            <summary>
+            A user-supplied action which can be used with <see cref="M:Nokia.Graphics.Imaging.PixelRegion.ForEachRow(Nokia.Graphics.Imaging.PixelRegion,Nokia.Graphics.Imaging.PixelRegion.ProcessRowWithSourceAction)"/>, where a source PixelRegion with non-zero margins is taken into account.
+            </summary>
+            <param name="sourceStartIndex">The index within the source <see cref="P:Nokia.Graphics.Imaging.PixelRegion.ImagePixels"/> of the first pixel to process on this row.</param>
+            <param name="targetStartIndex">The index within <see cref="P:Nokia.Graphics.Imaging.PixelRegion.ImagePixels"/> of the first pixel to process on this row.</param>
+            <param name="width">The number of target pixels to write on this row.</param>
+            <param name="startPosition">For reference, this is the position of the first pixel in this row, within the entire image. Margins are not included.</param>
+        </member>
+        <member name="T:Nokia.Graphics.Imaging.CustomImageSourceBase">
+            <summary>
+            Managed base class for custom image sources.
+            </summary>
+            <remarks>
+            The only supported color format in this version is ColorFormat.Bgra8888, which means pixels are represented as <see cref="T:System.UInt32"/> values.
+            </remarks>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.#ctor(Windows.Foundation.Size)">
+            <summary>
+            CustomImageSourceBase constructor.
+            </summary>
+            <param name="size">Inherent size of the image.</param>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.Dispose(System.Boolean)">
+            <summary>
+            Dispose the object.
+            </summary>
+            <param name="disposing">True if this is a call to Dispose(), or false if called by the finalizer.</param>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.OnLoadAsync">
+            <summary>
+            Called when the image source should load/prepare for rendering.
+            </summary>
+            <returns>
+            An async action representing the work.
+            </returns>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.OnProcess(Nokia.Graphics.Imaging.PixelRegion)">
+            <summary>
+            Called when the image source is asked to generate a rectangular area of the image.
+            </summary>
+            <param name="pixelRegion">The region of pixels to process.</param>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.FromColor(Windows.UI.Color)">
+            <summary>
+            Encode a <see cref="T:Windows.UI.Color"/> into an uint.
+            </summary>
+            <param name="color">The color to encode.</param>
+            <returns>An uint.</returns>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.PreloadAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.GetInfoAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.Lock(Nokia.Graphics.Imaging.RenderRequest)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.Invalidate">
+            <summary>
+            Requests a reloading of the image source during the next load or render operation.
+            Note: Calling invalidate during a load or render operation will have no effect.
+            </summary>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.GetBitmapAsync(Nokia.Graphics.Imaging.Bitmap,Nokia.Graphics.Imaging.OutputOption)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.Nokia#Graphics#Imaging#ICustomImageSource#LoadAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.Nokia#Graphics#Imaging#ICustomImageSource#ProvideBuffer(Windows.Foundation.Size)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.CustomImageSourceBase.Nokia#Graphics#Imaging#ICustomImageSource#Process(Windows.Foundation.Rect)">
+            <inheritdoc/>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.CustomImageSourceBase.CanSetSize">
+            <inheritdoc/>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.CustomImageSourceBase.Size">
+            <inheritdoc/>
+        </member>
+        <member name="T:Nokia.Graphics.Imaging.StreamImageSource">
+            <summary>
+            An image source implementing <see cref="T:Nokia.Graphics.Imaging.IImageProvider"/>, reading its data from a <see cref="P:Nokia.Graphics.Imaging.StreamImageSource.Stream"/>.
+            </summary>
+            <remarks>
+            StreamImageSource will create a short-term copy of the input Stream before creating a long-term copy for internal use. That means that at it's peak consumption it will require two full sized buffers. 
+            In normal circumstances this isn't a problem, however when dealing with very large image sources an OutOfMemoryException may be thrown.
+            When dealing with very large streams use of <see cref="T:Nokia.Graphics.Imaging.BufferImageSource"/> is recommended.
+            </remarks>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.StreamImageSource.#ctor(System.IO.Stream,Nokia.Graphics.Imaging.ImageFormat)">
+            <summary>
+            StreamImageSource constructor.
+            </summary>
+            <param name="stream">The stream to read and use as an image source.</param>
+            <param name="imageFormat">The format of the image. If not specified, autodetects.</param>
+            <remarks>The passed in stream is read from the current position until the end.</remarks>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.StreamImageSource.PreloadAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.StreamImageSource.GetBitmapAsync(Nokia.Graphics.Imaging.Bitmap,Nokia.Graphics.Imaging.OutputOption)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.StreamImageSource.GetInfoAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.StreamImageSource.Lock(Nokia.Graphics.Imaging.RenderRequest)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Nokia.Graphics.Imaging.StreamImageSource.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.StreamImageSource.Stream">
+            <summary>
+            The stream containing compressed image data.
+            </summary>
+            <remarks>
+            Setting this to a <see cref="T:System.IO.Stream"/> different from the one passed into the constructor means the image format will be auto-detected.
+            </remarks>
+        </member>
+        <member name="P:Nokia.Graphics.Imaging.StreamImageSource.ImageFormat">
+            <summary>
+            The format of the compressed image data.
+            </summary>
+        </member>
+    </members>
+</doc>

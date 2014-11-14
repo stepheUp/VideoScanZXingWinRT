@@ -1,0 +1,24 @@
+﻿<Page
+    x:Class="VideoScanZXing.WP81.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:VideoScanZXing.WP81"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Image x:Name="captureElement"/>
+        <ItemsControl x:Name="icBarCodes" Background="Transparent" ItemsSource="{Binding}" Foreground="Azure"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <Button Content="Go !" Click="Button_Click"/>
+            <Button  Content="Stop !" Click="Button_Click_1"/>
+        </StackPanel>
+        
+    </Grid>
+</Page>

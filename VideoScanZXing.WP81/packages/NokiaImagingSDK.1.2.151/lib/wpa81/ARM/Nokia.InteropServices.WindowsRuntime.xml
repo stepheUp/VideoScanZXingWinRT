@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        "Nokia.InteropServices.WindowsRuntime"
+    </assembly>
+    <members>
+        <member name="M:Nokia.Utility.BufferPolicyBase.GetCapacity">
+            <summary>Called by Buffer. Get the maximum capacity in bytes of this buffer.</summary>
+            <returns>Byte count that this buffer holds at most.</returns>
+        </member>
+        <member name="M:Nokia.Utility.BufferPolicyBase.GetLength">
+            <summary>Called by Buffer. Get the used number of bytes of data in the buffer.</summary>
+            <returns>Byte count being in use.</returns>
+        </member>
+        <member name="M:Nokia.Utility.BufferPolicyBase.SetLength(System.UInt32)">
+            <summary>Called by Buffer. Set the used number of bytes of data in the buffer.</summary>
+        </member>
+        <member name="M:Nokia.Utility.BufferPolicyBase.OpenData">
+            <summary>Called by Buffer. Open the underlying data for direct pointer access. The data remains open for pointer access for as long as the returned object lives.</summary>
+            <returns>Object derived from BufferDataPolicyBase.</returns>
+        </member>
+        <member name="T:Nokia.Utility.BufferPolicyBase">
+            <summary>Base class for IBuffer implementation policies.</summary>
+            <remarks>
+This class should be derived from in order to create an IBuffer implementation. It can then
+be used by the Buffer class which handles all the WinRT/COM specifics.
+<para>Make sure the OpenData method returns your custom BufferDataPolicyBase-derived object.</para></remarks>
+        </member>
+        <member name="M:Nokia.Utility.BufferDataPolicyBase.GetPointer">
+            <summary>Returns a pointer to the data. The pointer is valid at least until this object is destroyed.</summary>
+            <returns>A pointer to the data.</returns>
+        </member>
+        <member name="T:Nokia.Utility.BufferDataPolicyBase">
+            <summary>Base class for IBufferByteAccess implementation policies.</summary>
+            <remarks>
+This class should be derived from and wraps logic "during" buffer data access.
+An object of the class will be created when the data is starting to be accessed, and destroyed when
+the data is no longer used. NOTE: This differs from normal WinRT semantics! But holds true for the SDK.
+</remarks>
+        </member>
+        <member name="F:Nokia.Utility.ScopedTryLock.IsOwned">
+            <summary>Indicates if the lock was acquired during construction.</summary>
+        </member>
+        <member name="M:Nokia.Utility.ScopedTryLock.#ctor(Concurrency.critical_section*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,System.UInt32)">
+            <summary>Try to acquire a critical section, and keep trying for <paramref name="timeoutMillis" />.</summary>
+            <remarks>This object will unlock the critical section if necessary upon destruction.</remarks>
+            <param name="criticalSection">The critical section to acquire.</param>
+            <param name="timeoutMillis">How long to try for, in milliseconds.</param>
+        </member>
+        <member name="M:Nokia.Utility.ScopedTryLock.#ctor(Concurrency.critical_section*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+            <summary>Try to acquire a critical section.</summary>
+            <remarks>This object will unlock the critical section if necessary upon destruction.</remarks>
+            <param name="criticalSection">The critical section to acquire.</param>
+        </member>
+        <member name="T:Nokia.Utility.ScopedTryLock">
+            <summary>RAII wrapper for calling try_lock/try_lock_for and the unlock as appropriate on a <see cref="T:Concurrency.critical_section" />.</summary>
+        </member>
+        <member name="M:Nokia.InteropServices.WindowsRuntime.BufferFactory.CreateFromBuffer(Windows.Storage.Streams.IBuffer,Windows.UI.Core.CoreDispatcher)">
+            <summary>Create an IBuffer wrapping another IBuffer, making sure that the inner IBuffer
+is appropriately called using the provided CoreDispatcher. Currently only the retreival of 
+IBufferByteAccess is handled, which is enough for WriteableBitmap.
+</summary>
+            <param name="buffer">A pointer to the data to wrap in an IBuffer.</param>
+            <param name="dispatcher">CoreDispatcher used for accessing buffer.</param>
+            <returns>An IBuffer pointing to the same data as bufferPointer</returns>
+        </member>
+        <member name="M:Nokia.InteropServices.WindowsRuntime.BufferFactory.CreateBuffer(Nokia.InteropServices.WindowsRuntime.ILockableMemory)">
+            <summary>Create an IBuffer from an ILockableMemory.</summary>
+            <param name="lockableMemory">A pointer to the data to wrap in an IBuffer.</param>
+            <returns>An IBuffer pointing to the same data as bufferPointer</returns>
+        </member>
+        <member name="T:Nokia.InteropServices.WindowsRuntime.BufferFactory">
+            <summary>Factory for creating an instance of IBuffer from an ILockableMemory.</summary>
+        </member>
+        <member name="P:Nokia.InteropServices.WindowsRuntime.ILockableMemory.Length">
+            <summary>The length of the buffer.</summary>
+        </member>
+        <member name="M:Nokia.InteropServices.WindowsRuntime.ILockableMemory.Unlock">
+            <summary>Unlock the buffer for pointer access, invalidating the previously returned raw pointer.</summary>
+        </member>
+        <member name="M:Nokia.InteropServices.WindowsRuntime.ILockableMemory.Lock">
+            <summary>Lock the buffer for pointer access.</summary>
+            <returns>Raw pointer as an int64.</returns>
+        </member>
+        <member name="T:Nokia.InteropServices.WindowsRuntime.ILockableMemory">
+            <summary>
+A buffer represented by a pointer to a memory location and a length.
+Implementations can be used to create IBuffer objects using a BufferFactory.
+</summary>
+        </member>
+    </members>
+</doc>

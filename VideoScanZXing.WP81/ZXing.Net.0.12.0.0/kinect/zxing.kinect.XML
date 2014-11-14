@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>zxing.kinect</name>
+    </assembly>
+    <members>
+        <member name="T:ZXing.Kinect.BarcodeReader">
+            <summary>
+            A smart class to decode the barcode inside a ColorImageFrame object
+            </summary>
+        </member>
+        <member name="M:ZXing.Kinect.BarcodeReader.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:ZXing.Kinect.BarcodeReader"/> class.
+            </summary>
+        </member>
+        <member name="M:ZXing.Kinect.BarcodeReader.#ctor(ZXing.Reader,System.Func{Microsoft.Kinect.ColorImageFrame,ZXing.LuminanceSource},System.Func{ZXing.LuminanceSource,ZXing.Binarizer})">
+            <summary>
+            Initializes a new instance of the <see cref="T:ZXing.Kinect.BarcodeReader"/> class.
+            </summary>
+            <param name="reader">Sets the reader which should be used to find and decode the barcode.
+            If null then MultiFormatReader is used</param>
+            <param name="createLuminanceSource">Sets the function to create a luminance source object for a ColorImageFrame.
+            If null, default is used</param>
+            <param name="createBinarizer">Sets the function to create a binarizer object for a luminance source.
+            If null then HybridBinarizer is used</param>
+        </member>
+        <member name="M:ZXing.Kinect.BarcodeReader.#ctor(ZXing.Reader,System.Func{Microsoft.Kinect.ColorImageFrame,ZXing.LuminanceSource},System.Func{ZXing.LuminanceSource,ZXing.Binarizer},System.Func{System.Byte[],System.Int32,System.Int32,ZXing.RGBLuminanceSource.BitmapFormat,ZXing.LuminanceSource})">
+            <summary>
+            Initializes a new instance of the <see cref="T:ZXing.Kinect.BarcodeReader"/> class.
+            </summary>
+            <param name="reader">Sets the reader which should be used to find and decode the barcode.
+            If null then MultiFormatReader is used</param>
+            <param name="createLuminanceSource">Sets the function to create a luminance source object for a bitmap.
+            If null, default is used</param>
+            <param name="createBinarizer">Sets the function to create a binarizer object for a luminance source.
+            If null then HybridBinarizer is used</param>
+        </member>
+        <member name="T:ZXing.Kinect.ColorImageFrameLuminanceSource">
+            <summary>
+            special luminance class which supports ColorImageFrame directly
+            </summary>
+        </member>
+        <member name="M:ZXing.Kinect.ColorImageFrameLuminanceSource.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ZXing.Kinect.ColorImageFrameLuminanceSource"/> class.
+            </summary>
+            <param name="width">The width.</param>
+            <param name="height">The height.</param>
+        </member>
+        <member name="M:ZXing.Kinect.ColorImageFrameLuminanceSource.#ctor(Microsoft.Kinect.ColorImageFrame)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ZXing.Kinect.ColorImageFrameLuminanceSource"/> class.
+            </summary>
+            <param name="bitmap">The bitmap.</param>
+        </member>
+        <member name="M:ZXing.Kinect.ColorImageFrameLuminanceSource.#ctor(Microsoft.Kinect.ColorImageFrame,System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ZXing.Kinect.ColorImageFrameLuminanceSource"/> class.
+            </summary>
+            <param name="bitmap">The bitmap.</param>
+            <param name="flipTheImage">if set to <c>true</c> [flip the image].</param>
+        </member>
+    </members>
+</doc>
