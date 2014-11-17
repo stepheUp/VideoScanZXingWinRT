@@ -7,12 +7,14 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
 using VideoScanZXing.Common;
+using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+using System.Linq;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=391641
 
@@ -31,7 +33,6 @@ namespace VideoScanZXing.WP81
         SemaphoreSlim _semScan = new SemaphoreSlim(1);
 
         Task _renderTask;
-        bool _stop = false;
         bool _capturing = true;
         double _width;
         double _height;
@@ -50,7 +51,7 @@ namespace VideoScanZXing.WP81
         /// </summary>
         /// <param name="e">Event data that describes how this page was reached.
         /// This parameter is typically used to configure the page.</param>
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             // TODO: Prepare page for display here.
 
@@ -65,7 +66,7 @@ namespace VideoScanZXing.WP81
         {
             base.OnNavigatedFrom(e);
 
-            // Free all
+            // Free all - NECESSARY TO CLEANUP PROPERLY !
             _capturing = false;
             _cameraPreviewImageSource.Dispose();
             _writeableBitmapRenderer.Dispose();
@@ -77,9 +78,10 @@ namespace VideoScanZXing.WP81
             // Create a camera preview image source (from Imaging SDK)
             _cameraPreviewImageSource = new CameraPreviewImageSource();
             
-            // La sélection de la caméra arrière plante sur mon device
-            //var devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+            // La sélection de la caméra arrière plante sur mon device :/
+            //var devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);           
             //var backCamera = devices.FirstOrDefault(x => x.EnclosureLocation != null && x.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Back);
+            //await _cameraPreviewImageSource.InitializeAsync(backCamera.Id);
             await _cameraPreviewImageSource.InitializeAsync(string.Empty);
 
             var properties = await _cameraPreviewImageSource.StartPreviewAsync();
@@ -114,7 +116,8 @@ namespace VideoScanZXing.WP81
 
         private void OnError(Exception e)
         {
-
+            Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
+               CoreDispatcherPriority.Normal, () => _barcodes.Add(e.Message));
         }
 
 
@@ -148,7 +151,8 @@ namespace VideoScanZXing.WP81
                             // On SCANNE 1 image à la fois on ignore celles qui arrivent entre temps
                             if (await _semScan.WaitAsync(0) == true)
                             {
-                                ScanImage(pixelsArray);
+                                // On n'attend pas la fin...
+                                Task.Run(() => ScanImage(pixelsArray));
                             }                               
                         }
                 }
@@ -162,108 +166,25 @@ namespace VideoScanZXing.WP81
             }
         }
 
-
-        //private async Task Render()
-        //{
-        //    // Si je ne suis pas déjà en train d'afficher :
-        //    if(await _semRender.WaitAsync(0) == true)
-        //    { 
-        //        try
-        //        {
-        //                // Render camera preview frame to screen
-        //                _writeableBitmapRenderer.WriteableBitmap = _writeableBitmap;
-        //                await _writeableBitmapRenderer.RenderAsync();
-        //                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
-        //                    CoreDispatcherPriority.High, () =>
-        //                    {
-        //                        _writeableBitmap.Invalidate();
-        //                    });
-
-
-        //                if (_capturing)
-        //                {
-        //                    // on scan 1 frame à la fois
-        //                    if (await _semScan.WaitAsync(0) == true)
-        //                    {
-        //                        _writeableBitmapRenderer.WriteableBitmap = _wb2;
-        //                        await _writeableBitmapRenderer.RenderAsync();
-        //                        ScanImage(_wb2);
-        //                    }                               
-        //                }
-        //        }
-        //    catch
-        //    {
-        //    }
-        //    finally
-        //    {
-        //        _semRender.Release();
-        //    }
-        //    }
-        //}
-
-
         private void ScanImage(byte[] pixelsArray)
         {
-                try
-                {
-                    BarCodeManager.ScanBitmap(pixelsArray, (int)_width, (int)_height);
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine(e);
-                    // Wasn't able to find a barcode
-                }
-                finally
-                {
-                    _semScan.Release();
-                }
+            try
+            {
+                BarCodeManager.ScanBitmap(pixelsArray, (int)_width, (int)_height);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                // Wasn't able to find a barcode
+            }
+            finally
+            {
+                _semScan.Release();
+            }
 
 
-                //if (result != null)
-                //{
-                //    Debug.WriteLine(result.Text);
-                //    if (BarCodeManager._onBarCodeFound != null)
-                //    {
-                //        //_stop = true;
-                //        BarCodeManager._onBarCodeFound(result.Text);
-                //    }
-                //}
         }
-        //private void ScanImage(WriteableBitmap wb2)
-        //{
-        //    // On n'utilise pas await, volontairement
-        //    Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-        //    {
-        //        Result result = null;
 
-        //        try
-        //        {
-        //            result = BarCodeManager.ScanBitmap(wb2);
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            Debug.WriteLine(e);
-        //            // Wasn't able to find a barcode
-        //        }
-        //        finally
-        //        {
-        //            _semScan.Release();
-        //        }
-
-
-        //        if (result != null)
-        //        {
-        //            Debug.WriteLine(result.Text);
-        //            if (BarCodeManager._onBarCodeFound != null)
-        //            {
-        //                //_stop = true;
-        //                BarCodeManager._onBarCodeFound(result.Text);
-        //            }
-        //        }
-
-        //    });
-
-        //}
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             await InitializeAsync();
@@ -272,7 +193,7 @@ namespace VideoScanZXing.WP81
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            _stop = true;
+            _capturing = false;
         }
     }
 }

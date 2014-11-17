@@ -18,7 +18,7 @@ namespace VideoScanZXing.Common
 
         static BarCodeManager()
         {
-            MaxTry = 15;
+            //MaxTry = 15;
         }
 
         /// <summary>
@@ -54,101 +54,16 @@ namespace VideoScanZXing.Common
             return result;
         }
 
-        //public static Result ScanBitmap(WriteableBitmap writeableBmp)
-        //{
-        //    var barcodeReader = new BarcodeReader()
-        //    {
-        //        AutoRotate = true,
-        //        Options = new ZXing.Common.DecodingOptions() { TryHarder = false, PossibleFormats = new BarcodeFormat []{ BarcodeFormat.EAN_13 } }
-        //    };
-        //    var result = barcodeReader.Decode(writeableBmp);
-
-        //    //if (result != null)
-        //    //{
-        //    //    CaptureImage.Source = writeableBmp;
-        //    //}
-
-        //    return result;
-        //}
 
         /// <summary>
         /// Try 20 times to focus and scan for 1,5 sec (default)
         /// </summary>
-        public static int MaxTry
-        {
-            get;
-            set;
-        }
-
-        //private static Reader _ZXingReader;
-        //internal static Reader ZXingReader
+        //public static int MaxTry
         //{
-        //    get
-        //    {
-        //        if (_ZXingReader == null)
-        //            return new EAN13Reader();
-        //        return _ZXingReader;
-        //    }
-
-        //    set
-        //    {
-        //        _ZXingReader = value;
-        //    }
+        //    get;
+        //    set;
         //}
 
-        /// <summary>
-        /// Returns the zxing reader class for the current specified ScanMode.
-        /// </summary>
-        /// <returns></returns>
-        //internal static Reader GetReader(BarcodeFormat format)
-        //{
-        //    var zxingHints
-        //        = new Dictionary<DecodeHintType, object>() { { DecodeHintType.TRY_HARDER, true } };
-
-        //    Reader r;
-
-        //    switch (format.ToString())
-        //    {
-        //        case "CODE_128":
-        //            r = new Code128Reader();
-        //            break;
-        //        case "CODE_39":
-        //            r = new Code39Reader();
-        //            break;
-        //        case "EAN_13":
-        //            r = new EAN13Reader();
-        //            break;
-        //        case "EAN_8":
-        //            r = new EAN8Reader();
-        //            break;
-        //        case "ITF":
-        //            r = new ITFReader();
-        //            break;
-        //        case "UPC_A":
-        //            r = new UPCAReader();
-        //            break;
-        //        case "UPC_E":
-        //            r = new UPCEReader();
-        //            break;
-        //        case "QR_CODE":
-        //            r = new QRCodeReader();
-        //            break;
-        //        case "DATAMATRIX":
-        //            r = new DataMatrixReader();
-        //            break;
-
-        //        case "ALL_1D":
-        //            r = new MultiFormatOneDReader(zxingHints);
-        //            break;
-
-        //        //Auto-Detect:
-        //        case "UPC_EAN":
-        //        default:
-        //            r = new MultiFormatUPCEANReader(zxingHints);
-        //            break;
-        //    }
-        //    return r;
-        //}
 
         /// <summary>
         /// Returns the zxing reader class for the current specified ScanMode.
