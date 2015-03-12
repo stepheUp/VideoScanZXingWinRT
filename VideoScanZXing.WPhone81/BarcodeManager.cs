@@ -6,15 +6,23 @@ using System.Diagnostics;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
-namespace VideoScanZXing.Common
+namespace VideoScanZXing.WP81
 {
     /// <summary>
     /// Scan a barcode for a live video stream
     /// </summary>
     public static class BarCodeManager
     {
-        internal static Action<string> _onBarCodeFound;
-        internal static Action<Exception> _onError;
+        internal static Action<string> OnBarCodeFound
+        {
+            get;
+            private set;
+        }
+        internal static Action<Exception> OnError
+        {
+            get;
+            private set;
+        }
 
         internal static BarcodeReader _ZXingReader;
 
@@ -32,27 +40,26 @@ namespace VideoScanZXing.Common
         /// <param name="zxingReader">(optional) A specific reader format, Default will be EAN13Reader </param>
         public static void StartScan(Action<string> onBarCodeFound, Action<Exception> onError, BarcodeFormat barcodeFormat = BarcodeFormat.EAN_13)
         {
-            _onBarCodeFound = onBarCodeFound;
-            _onError = onError;
+            OnBarCodeFound = onBarCodeFound;
+            OnError = onError;
 
             _ZXingReader = GetReader(barcodeFormat);
 
             var rootFrame = Window.Current.Content as Frame;
             rootFrame.Navigate(typeof(MainPage));
-
         }
 
-        public static Result ScanBitmap(byte[] pixelsArray, int width, int height)
+        internal static Result ScanBitmap(byte[] pixelsArray, int width, int height)
         {
             var result = _ZXingReader.Decode(pixelsArray, width, height, BitmapFormat.Unknown);
 
             if (result != null)
             {
                 Debug.WriteLine(result.Text);
-                if (BarCodeManager._onBarCodeFound != null)
+                if (BarCodeManager.OnBarCodeFound != null)
                 {
                     //_stop = true;
-                    BarCodeManager._onBarCodeFound(result.Text);
+                    BarCodeManager.OnBarCodeFound(result.Text);
                 }
             }
 

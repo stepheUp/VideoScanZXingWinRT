@@ -14,8 +14,11 @@
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <Image x:Name="captureElement"/>
-        <!-- for debugging purpose -->
         <ItemsControl x:Name="icBarCodes" Background="Transparent" ItemsSource="{Binding}" Foreground="Azure"/>
-       
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <Button Content="Go !" Click="Button_Click"/>
+            <Button  Content="Stop !" Click="Button_Click_1"/>
+        </StackPanel>
+        
     </Grid>
 </Page>

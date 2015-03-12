@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
+using VideoScanZXing.Common;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.UI.Core;
@@ -17,7 +18,7 @@ using System.Linq;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=391641
 
-namespace VideoScanZXing.WP81
+namespace VideoScanZXing.Common
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -50,10 +51,9 @@ namespace VideoScanZXing.WP81
         /// </summary>
         /// <param name="e">Event data that describes how this page was reached.
         /// This parameter is typically used to configure the page.</param>
-        protected async override void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             // TODO: Prepare page for display here.
-            await InitializeAsync();
 
             // TODO: If your application contains multiple pages, ensure that you are
             // handling the hardware Back button by registering for the
@@ -66,12 +66,6 @@ namespace VideoScanZXing.WP81
         {
             base.OnNavigatedFrom(e);
 
-            // Free all - NECESSARY TO CLEANUP PROPERLY !
-            Cleanup();
-        }
-
-        private void Cleanup()
-        {
             // Free all - NECESSARY TO CLEANUP PROPERLY !
             _capturing = false;
             _cameraPreviewImageSource.Dispose();
@@ -112,25 +106,18 @@ namespace VideoScanZXing.WP81
         }
 
   
-        private async void OnBarCodeFound(string barcode)
+        private void OnBarCodeFound(string barcode)
         {
             // Affiche le code-barre à l'écran
-#if DEBUG
-            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
+             Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
                             CoreDispatcherPriority.Normal, () => _barcodes.Add(barcode));
-#endif
-            BarCodeManager.OnBarCodeFound(barcode);
         }
 
 
-        private async void OnError(Exception e)
+        private void OnError(Exception e)
         {
-#if DEBUG
-            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
+            Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
                CoreDispatcherPriority.Normal, () => _barcodes.Add(e.Message));
-#endif
-            BarCodeManager.OnError(e);
-
         }
 
 
@@ -165,18 +152,17 @@ namespace VideoScanZXing.WP81
                             if (await _semScan.WaitAsync(0) == true)
                             {
                                 // On n'attend pas la fin...
-                                await Task.Run(() => ScanImage(pixelsArray));
+                                Task.Run(() => ScanImage(pixelsArray));
                             }                               
                         }
                 }
-                catch(Exception ex)
-                {
-                    OnError(ex);
-                }
-                finally
-                {
-                    _semRender.Release();
-                }
+            catch
+            {
+            }
+            finally
+            {
+                _semRender.Release();
+            }
             }
         }
 
@@ -199,15 +185,15 @@ namespace VideoScanZXing.WP81
 
         }
 
-        //private async void Button_Click(object sender, RoutedEventArgs e)
-        //{
-        //    //await InitializeAsync();
-        //    //(sender as Button).IsEnabled = false;
-        //}
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            await InitializeAsync();
+            (sender as Button).IsEnabled = false;
+        }
 
-        //private void Button_Click_1(object sender, RoutedEventArgs e)
-        //{
-        //    _capturing = false;
-        //}
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            _capturing = false;
+        }
     }
 }
