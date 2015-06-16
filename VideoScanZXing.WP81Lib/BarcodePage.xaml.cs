@@ -1,28 +1,26 @@
-﻿using Nokia.Graphics.Imaging;
+﻿
+using Lumia.Imaging;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Devices.Enumeration;
-using Windows.Foundation;
 using Windows.UI.Core;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Devices.Enumeration;
 using System.Linq;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=391641
 
-namespace VideoScanZXing.WP81
+namespace VideoScanZXing.WP81Lib
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : Page
+    public sealed partial class BarcodePage : Page
     {
         CameraPreviewImageSource _cameraPreviewImageSource;
         WriteableBitmap _writeableBitmap;
@@ -31,14 +29,18 @@ namespace VideoScanZXing.WP81
         SemaphoreSlim _semRender = new SemaphoreSlim(1);
         SemaphoreSlim _semScan = new SemaphoreSlim(1);
 
+        TimeSpan _timeout;
+        Stopwatch _sw = new Stopwatch();
+
         Task _renderTask;
         bool _capturing;
         double _width;
         double _height;
+        bool _cleanedUp;
 
         ObservableCollection<string> _barcodes = new ObservableCollection<string>();
 
-        public MainPage()
+        public BarcodePage()
         {
             this.InitializeComponent();
 
@@ -72,22 +74,29 @@ namespace VideoScanZXing.WP81
 
         private void Cleanup()
         {
-            // Free all - NECESSARY TO CLEANUP PROPERLY !
-            _capturing = false;
-            _cameraPreviewImageSource.Dispose();
-            _writeableBitmapRenderer.Dispose();
+            if (!_cleanedUp)
+            {
+                // Free all - NECESSARY TO CLEANUP PROPERLY !
+                _cameraPreviewImageSource.PreviewFrameAvailable -= OnPreviewFrameAvailable;
+                _capturing = false;
+                _cameraPreviewImageSource.Dispose();
+                _writeableBitmapRenderer.Dispose();
+                _cleanedUp = true;
+            }
         }
 
 
         public async Task InitializeAsync()
         {
+            _timeout = BarCodeManager.MaxTry;
+            _sw.Restart();
             _capturing = true;
-
+            _cleanedUp = false;
             // Create a camera preview image source (from Imaging SDK)
             _cameraPreviewImageSource = new CameraPreviewImageSource();
             
             // La sélection de la caméra arrière plante sur mon device :/
-            //var devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);           
+            //var devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
             //var backCamera = devices.FirstOrDefault(x => x.EnclosureLocation != null && x.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Back);
             //await _cameraPreviewImageSource.InitializeAsync(backCamera.Id);
             await _cameraPreviewImageSource.InitializeAsync(string.Empty);
@@ -108,37 +117,44 @@ namespace VideoScanZXing.WP81
             _cameraPreviewImageSource.PreviewFrameAvailable += OnPreviewFrameAvailable;
 
             icBarCodes.ItemsSource = _barcodes;
-
-            // Init le scan de code-barre
-            BarCodeManager.StartScan(OnBarCodeFound, OnError);
         }
 
   
         private async void OnBarCodeFound(string barcode)
         {
-            // Affiche le code-barre à l'écran
-#if DEBUG
+            Cleanup();
             await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
-                            CoreDispatcherPriority.Normal, () => _barcodes.Add(barcode));
-#endif
-            BarCodeManager.OnBarCodeFound(barcode);
+            CoreDispatcherPriority.Normal, () =>
+            {
+                BarCodeManager.OnBarCodeFound(barcode);
+                this.Frame.GoBack();
+            });
+
         }
 
 
         private async void OnError(Exception e)
         {
-#if DEBUG
+            Cleanup();
             await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
-               CoreDispatcherPriority.Normal, () => _barcodes.Add(e.Message));
-#endif
-            BarCodeManager.OnError(e);
-
+            CoreDispatcherPriority.Normal, () =>
+            {
+                BarCodeManager.OnError(e);
+                this.Frame.GoBack();
+            });
         }
 
 
         private void OnPreviewFrameAvailable(IImageSize args)
         {
-            _renderTask = Render();
+            if (_sw.Elapsed > _timeout)
+            {
+                OnError(new TimeoutException("Could not find any barcode"));
+            }
+            else
+            {
+                _renderTask = Render();
+            }
         }
 
         private async Task Render()
@@ -186,7 +202,11 @@ namespace VideoScanZXing.WP81
         {
             try
             {
-                BarCodeManager.ScanBitmap(pixelsArray, (int)_width, (int)_height);
+                var result = BarCodeManager.ScanBitmap(pixelsArray, (int)_width, (int)_height);
+                if(result != null)
+                {
+                    OnBarCodeFound(result.Text);            
+                }                
             }
             catch (Exception e)
             {
@@ -197,19 +217,8 @@ namespace VideoScanZXing.WP81
             {
                 _semScan.Release();
             }
-
-
         }
 
-        //private async void Button_Click(object sender, RoutedEventArgs e)
-        //{
-        //    //await InitializeAsync();
-        //    //(sender as Button).IsEnabled = false;
-        //}
 
-        //private void Button_Click_1(object sender, RoutedEventArgs e)
-        //{
-        //    _capturing = false;
-        //}
     }
 }

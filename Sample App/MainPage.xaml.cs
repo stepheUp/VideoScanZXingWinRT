@@ -12,7 +12,8 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using VideoScanZXing.WP81;
+using VideoScanZXing.WP81Lib;
+using System.Collections.ObjectModel;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=391641
 
@@ -23,6 +24,8 @@ namespace Sample_App
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        IList<string> _barcodesFound = new ObservableCollection<string>();
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -48,16 +51,20 @@ namespace Sample_App
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            VideoScanZXing.WP81.BarCodeManager.StartScan(BarcodeFound, OnError);
+            lvBarcodesFound.ItemsSource = _barcodesFound;
+            VideoScanZXing.WP81Lib.BarCodeManager.StartScan(BarcodeFound, OnError, TimeSpan.FromSeconds(25));
+
         }
 
         void BarcodeFound(string barcode)
-        {
-
+        {            
+            _barcodesFound.Add(barcode);
         }
 
         void OnError(Exception e)
-        { 
+        {
+            // Show the error in the barcode list
+            _barcodesFound.Add(String.Format("OnError: {0}", e.Message));
         }
     }
 }

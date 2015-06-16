@@ -1,4 +1,9 @@
-﻿using Nokia.Graphics.Imaging;
+﻿
+using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Imaging;.Graphics.Imaging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,12 +22,12 @@ using System.Linq;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=391641
 
-namespace VideoScanZXing.WP81
+namespace VideoScanZXing.WinRT
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : Page
+    public sealed partial class BarcodePage : Page
     {
         CameraPreviewImageSource _cameraPreviewImageSource;
         WriteableBitmap _writeableBitmap;

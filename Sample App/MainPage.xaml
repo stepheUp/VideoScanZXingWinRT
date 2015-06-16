@@ -9,6 +9,9 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <Button Click="Button_Click">Scan Barcode</Button>
+        <StackPanel>
+            <Button Click="Button_Click">Scan Barcode</Button>
+            <ListView x:Name="lvBarcodesFound" Width="200" Height="300"/>
+        </StackPanel>
     </Grid>
 </Page>
