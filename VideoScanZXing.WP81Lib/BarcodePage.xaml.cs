@@ -94,7 +94,7 @@ namespace VideoScanZXing.WP81Lib
             _cleanedUp = false;
             // Create a camera preview image source (from Imaging SDK)
             _cameraPreviewImageSource = new CameraPreviewImageSource();
-            
+
             // La sélection de la caméra arrière plante sur mon device :/
             //var devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
             //var backCamera = devices.FirstOrDefault(x => x.EnclosureLocation != null && x.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Back);
@@ -115,10 +115,7 @@ namespace VideoScanZXing.WP81Lib
 
             // Attach preview frame delegate
             _cameraPreviewImageSource.PreviewFrameAvailable += OnPreviewFrameAvailable;
-
-            icBarCodes.ItemsSource = _barcodes;
         }
-
   
         private async void OnBarCodeFound(string barcode)
         {

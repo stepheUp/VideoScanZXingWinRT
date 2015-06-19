@@ -14,8 +14,6 @@
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <Image x:Name="captureElement"/>
-        <!-- for debugging purpose -->
-        <ItemsControl x:Name="icBarCodes" Background="Transparent" ItemsSource="{Binding}" Foreground="Azure"/>
        
     </Grid>
 </Page>
