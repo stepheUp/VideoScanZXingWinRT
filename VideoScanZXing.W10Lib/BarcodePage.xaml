@@ -1,0 +1,15 @@
+﻿<Page
+    x:Class="VideoScanZXing.W10Lib.BarcodePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:VideoScanZXing.W10Lib"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid x:Name="tapROIGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
+
+        <CaptureElement x:Name="captureElement" VerticalAlignment="Center"/>
+       
+    </Grid>
+</Page>
