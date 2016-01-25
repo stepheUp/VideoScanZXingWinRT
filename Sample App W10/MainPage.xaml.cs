@@ -36,6 +36,7 @@ namespace Sample_App_W10
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+
             VideoScanZXing.W10Lib.BarCodeManager.StartScan(BarcodeFound, OnError, TimeSpan.FromSeconds(25));
         }
 

@@ -49,7 +49,7 @@ namespace VideoScanZXing.W10Lib
 
         double _width = 640;
         double _height = 480;
-        bool _cleanedUp;
+        bool _cleanedUp = true; //Resources are still unallocated
         bool _processScan = true;
 
         DisplayOrientations _autoRotation;
@@ -72,6 +72,7 @@ namespace VideoScanZXing.W10Lib
         {
             _autoRotation = DisplayInformation.AutoRotationPreferences;
             DisplayInformation.AutoRotationPreferences = DisplayOrientations.Landscape;
+
             // TODO: Prepare page for display here.
             await InitializeAsync();
 
@@ -117,8 +118,7 @@ namespace VideoScanZXing.W10Lib
         {
             _timeout = BarCodeManager.MaxTry;
             _sw.Restart();
-            _cleanedUp = false;
-            _processScan = true;      
+   
 
             var devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
             var backCamera = devices.FirstOrDefault(x => x.EnclosureLocation != null && x.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Back);
@@ -126,15 +126,25 @@ namespace VideoScanZXing.W10Lib
             m_mediaCapture = new MediaCapture();
             await m_mediaCapture.InitializeAsync();
 
-            m_mediaCapture.FocusChanged += M_mediaCapture_FocusChanged;          
-            captureElement.Source = m_mediaCapture;
-            await m_mediaCapture.StartPreviewAsync();
-
+            
             var focusControl = m_mediaCapture.VideoDeviceController.FocusControl;
-            await focusControl.UnlockAsync();
-            var settings = new FocusSettings { Mode = FocusMode.Continuous, AutoFocusRange = AutoFocusRange.FullRange };
-            focusControl.Configure(settings);
-            await focusControl.FocusAsync();
+            if (!focusControl.FocusChangedSupported)
+            {
+                OnErrorAsync(new Exception("AutoFocus control is not supported on this device"));
+            }
+            else
+            {
+                _cleanedUp = false;
+                _processScan = true;
+
+                m_mediaCapture.FocusChanged += M_mediaCapture_FocusChanged;
+                captureElement.Source = m_mediaCapture;
+                await m_mediaCapture.StartPreviewAsync();
+                await focusControl.UnlockAsync();
+                var settings = new FocusSettings { Mode = FocusMode.Continuous, AutoFocusRange = AutoFocusRange.FullRange };
+                focusControl.Configure(settings);
+                await focusControl.FocusAsync();
+            }
         }
 
         private void M_mediaCapture_FocusChanged(MediaCapture sender, MediaCaptureFocusChangedEventArgs args)

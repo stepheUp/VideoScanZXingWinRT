@@ -52,6 +52,7 @@ namespace Sample_App
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             lvBarcodesFound.ItemsSource = _barcodesFound;
+
             VideoScanZXing.WP81Lib.BarCodeManager.StartScan(BarcodeFound, OnError, TimeSpan.FromSeconds(25));
 
         }
