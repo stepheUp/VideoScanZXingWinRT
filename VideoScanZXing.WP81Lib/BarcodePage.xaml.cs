@@ -12,6 +12,7 @@ using Windows.UI.Xaml.Navigation;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Devices.Enumeration;
 using System.Linq;
+using Windows.Media.Devices;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=391641
 
@@ -31,6 +32,9 @@ namespace VideoScanZXing.WP81Lib
 
         TimeSpan _timeout;
         Stopwatch _sw = new Stopwatch();
+
+        TimeSpan focus_period = TimeSpan.FromSeconds(5);
+        VideoDeviceController vdc = null;
 
         Task _renderTask;
         bool _capturing;
@@ -103,6 +107,12 @@ namespace VideoScanZXing.WP81Lib
 
             var properties = await _cameraPreviewImageSource.StartPreviewAsync();
 
+            vdc = (VideoDeviceController)_cameraPreviewImageSource.VideoDeviceController;
+            if (vdc.FocusControl.Supported)
+            {
+                vdc.FocusControl.Configure(new FocusSettings { Mode = FocusMode.Auto });
+            }
+
             // Create a preview bitmap with the correct aspect ratio
             _width = 640.0;
             _height = (_width / properties.Width) * properties.Height;
@@ -142,8 +152,19 @@ namespace VideoScanZXing.WP81Lib
         }
 
 
-        private void OnPreviewFrameAvailable(IImageSize args)
+        private async void OnPreviewFrameAvailable(IImageSize args)
         {
+            if (_sw.Elapsed > focus_period)
+            {
+                try
+                {
+                    focus_period = focus_period + TimeSpan.FromSeconds(5);
+                    await vdc.FocusControl.FocusAsync();
+                }
+                catch { }
+            }
+
+
             if (_sw.Elapsed > _timeout)
             {
                 OnError(new TimeoutException("Could not find any barcode"));
