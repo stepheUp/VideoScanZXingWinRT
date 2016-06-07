@@ -154,3 +154,15 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+/VideoScanZXing.W10Lib
+/Sample App W10
+/packages/LumiaImagingSDK.2.0.208/lib/wpa81/ARM
+/packages/LumiaImagingSDK.2.0.208/lib/wpa81/x86
+/packages/LumiaImagingSDK.2.0.208/lib/wpa81-hidden
+/packages/LumiaImagingSDK.2.0.208/lib/wp8
+/packages/LumiaImagingSDK.2.0.208/lib/win81-hidden/x86
+/packages/LumiaImagingSDK.2.0.208/content
+/packages/LumiaImagingSDK.2.0.208/lib/win81/ARM
+/packages/LumiaImagingSDK.2.0.208/lib/win81/x86
+/packages/LumiaImagingSDK.2.0.208/lib/win81-hidden/ARM
+/packages/LumiaImagingSDK.2.0.208
