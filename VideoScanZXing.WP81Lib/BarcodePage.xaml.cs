@@ -111,6 +111,7 @@ namespace VideoScanZXing.WP81Lib
             if (vdc.FocusControl.Supported)
             {
                 vdc.FocusControl.Configure(new FocusSettings { Mode = FocusMode.Auto });
+                focus_period = TimeSpan.FromSeconds(5);
             }
 
             // Create a preview bitmap with the correct aspect ratio
